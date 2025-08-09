@@ -2,7 +2,7 @@
 
 A comprehensive Model Context Protocol (MCP) server for managing AWS infrastructure using the FastMCP SDK.
 
-Disclaimer: Note that this project is just an example of Kiro Vibe session and you must not use it for your production use before you test, validate, and ensure the functionality working for your requirements. 
+**Disclaimer**: Note that this project is just an example of Kiro Vibe session and you must not use it for your production use before you test, validate, and ensure the functionality working for your requirements. 
 
 ## Features
 
