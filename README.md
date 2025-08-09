@@ -1,6 +1,6 @@
 # AWS Infrastructure Manager MCP Server
 
-A comprehensive Model Context Protocol (MCP) server for managing AWS infrastructure using the FastMCP SDK.
+A comprehensive Model Context Protocol (MCP) server for managing AWS infrastructure using the FastMCP SDK. Generated using Kiro vibe coding sessions.
 
 **Disclaimer**: Note that this project is just an example of Kiro Vibe session and you must not use it for your production use before you test, validate, and ensure the functionality working for your requirements. 
 
