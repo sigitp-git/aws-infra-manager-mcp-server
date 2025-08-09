@@ -136,28 +136,26 @@ class AWSClientManager:
 # Global client manager
 aws_clients = AWSClientManager()
 
-def handle_aws_error(func):
-    """Decorator to handle AWS errors consistently."""
-    def wrapper(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        except ClientError as e:
+def handle_aws_error(operation_name: str = "AWS operation"):
+    """Handle AWS errors consistently."""
+    def handle_error(e: Exception) -> Dict[str, Any]:
+        if isinstance(e, ClientError):
             error_code = e.response['Error']['Code']
             error_message = e.response['Error']['Message']
-            logger.error(f"AWS ClientError: {error_code} - {error_message}")
+            logger.error(f"AWS ClientError in {operation_name}: {error_code} - {error_message}")
             return {
                 "error": True,
                 "error_code": error_code,
                 "error_message": error_message,
                 "details": str(e)
             }
-        except Exception as e:
-            logger.error(f"Unexpected error: {str(e)}")
+        else:
+            logger.error(f"Unexpected error in {operation_name}: {str(e)}")
             return {
                 "error": True,
                 "error_message": str(e)
             }
-    return wrapper
+    return handle_error
 
 # EC2 Management Tools
 @mcp.tool()
@@ -395,10 +393,7 @@ def create_subnet(request: SubnetRequest, region: str = "us-east-1") -> Dict[str
         "subnet": response['Subnet']
     }
 
-if __name__ == "__main__":
-    mcp.run()
-# Security
- Group Management Tools
+# Security Group Management Tools
 @mcp.tool()
 @handle_aws_error
 def create_security_group(request: SecurityGroupRequest, region: str = "us-east-1") -> Dict[str, Any]:
@@ -1155,8 +1150,8 @@ def list_hosted_zones(region: str = "us-east-1") -> Dict[str, Any]:
         "hosted_zones": response['HostedZones']
     }
 
-if __name__ == "__main__":
-    mcp.run()rror
+@mcp.tool()
+@handle_aws_error
 def get_iam_role(role_name: str, region: str = "us-east-1") -> Dict[str, Any]:
     """
     Get details of a specific IAM role.
@@ -1281,3 +1276,6 @@ def get_caller_identity(region: str = "us-east-1") -> Dict[str, Any]:
         "success": True,
         "identity": response
     }
+
+if __name__ == "__main__":
+    mcp.run()
