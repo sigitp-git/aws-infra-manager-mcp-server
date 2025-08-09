@@ -1,0 +1,32 @@
+{
+  "mcpServers": {
+    "aws-infra-manager": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        "/path/to/aws-infra-manager-mcp-server",
+        "python",
+        "-m",
+        "aws_infra_manager_mcp_server.server"
+      ],
+      "env": {
+        "AWS_REGION": "us-east-1",
+        "AWS_DEFAULT_REGION": "us-east-1"
+      },
+      "disabled": false,
+      "autoApprove": [
+        "get_caller_identity",
+        "get_aws_regions",
+        "get_availability_zones",
+        "list_ec2_instances",
+        "list_vpcs",
+        "list_security_groups",
+        "list_s3_buckets",
+        "list_lambda_functions",
+        "list_iam_roles",
+        "list_cloudformation_stacks"
+      ]
+    }
+  }
+}
