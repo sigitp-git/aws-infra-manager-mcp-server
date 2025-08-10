@@ -121,13 +121,17 @@ Add to your MCP client configuration (e.g., `.kiro/settings/mcp.json`):
         "aws_infra_manager_mcp_server.server"
       ],
       "env": {
-        "AWS_PROFILE": "mcp-server",
         "AWS_REGION": "us-east-1"
       },
       "disabled": false,
       "autoApprove": [
         "get_caller_identity",
-        "get_aws_regions",
+        "list_ec2_instances",
+        "list_vpcs",
+        "list_s3_buckets",
+        "list_rds_instances",
+        "list_lambda_functions",
+        "get_aws_regions"
         "list_ec2_instances",
         "list_vpcs",
         "list_s3_buckets"

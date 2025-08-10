@@ -1,43 +1,38 @@
 # AWS Infrastructure Manager MCP Server
 
-A comprehensive Model Context Protocol (MCP) server for managing AWS infrastructure using the FastMCP SDK. Generated using Kiro vibe coding sessions.
+A minimal, working Model Context Protocol (MCP) server for managing AWS infrastructure using the FastMCP SDK, developed using Kiro Vibe coding sessions. This project provides essential AWS management tools through a clean, reliable MCP interface.
 
-**Disclaimer**: Note that this project is just an example of Kiro Vibe session and you must not use it for your production use before you test, validate, and ensure the functionality working for your requirements. 
+**Status**: ✅ **Working and Tested** - This MCP server is functional and ready for use with Kiro and other MCP clients.
 
 ## Features
 
-This MCP server provides comprehensive management capabilities for:
+This MCP server provides essential AWS management capabilities:
 
-### 🏗️ **AWS Foundation Services**
-- **AWS Control Tower**: Landing zone management, guardrails, and governance
-- **AWS Organizations**: Account management, organizational units, and policies
-- **AWS Resource Access Manager (RAM)**: Cross-account resource sharing
+### 🔍 **Core AWS Tools**
+- **AWS Identity**: Get caller identity and account information
+- **Amazon EC2**: List and filter EC2 instances
+- **Amazon VPC**: List VPCs in your account
+- **Amazon S3**: List S3 buckets
+- **Amazon RDS**: List RDS database instances
+- **AWS Lambda**: List Lambda functions
+- **AWS Regions**: Get available AWS regions
 
-### 🖥️ **Compute & Networking**
-- **Amazon EC2**: Instance management, AMIs, security groups
-- **AWS Outposts**: Hybrid cloud infrastructure management
-- **Amazon VPC**: Virtual private cloud, subnets, routing, NAT gateways
-- **Amazon EKS**: Kubernetes cluster management and operations
-
-### 📊 **Monitoring & Observability**
-- **Amazon CloudWatch**: Metrics, logs, alarms, and dashboards
-- **Amazon Managed Prometheus**: Prometheus workspaces and queries
-- **Amazon Managed Grafana**: Grafana workspaces and dashboards
-
-### 🏗️ **Infrastructure as Code**
-- **AWS CloudFormation**: Stack management, templates, and deployments
+### 🛡️ **Built-in Features**
+- **Error Handling**: Comprehensive AWS API error handling
+- **Session Management**: Automatic AWS session and credential management
+- **FastMCP Integration**: Full compatibility with FastMCP framework
+- **Type Safety**: Proper type hints and validation
 
 ## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                AWS Infrastructure Manager                   │
+│            AWS Infrastructure Manager MCP Server            │
 ├─────────────────────────────────────────────────────────────┤
-│  Foundation      │  Compute/Network  │  Monitoring/IaC      │
-│  • Control Tower │  • EC2            │  • CloudWatch        │
-│  • Organizations │  • Outposts       │  • Prometheus        │
-│  • RAM           │  • VPC            │  • Grafana           │
-│                  │  • EKS            │  • CloudFormation    │
+│  Core Services   │  Compute         │  Storage & Functions  │
+│  • Identity      │  • EC2           │  • S3                 │
+│  • Regions       │  • VPC           │  • RDS                │
+│  • Error Handling│                  │  • Lambda             │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -46,20 +41,22 @@ This MCP server provides comprehensive management capabilities for:
 This MCP server is designed to be run with `uv`:
 
 ```bash
+# Clone the repository
+git clone <repository-url>
+cd aws-infra-manager-mcp-server
+
 # Install dependencies
-uv sync --extra dev
+uv sync
 
-# Run the server
-uv run aws-infra-manager-mcp-server
-
-# Or use the CLI tool
-uv run aws-infra-cli --help
-uv run aws-infra-manager-mcp-server
+# Test the server (optional)
+uv run python -m aws_infra_manager_mcp_server.server --help
 ```
 
 ## Configuration
 
-Add to your MCP client configuration:
+### MCP Client Configuration
+
+Add to your MCP client configuration (e.g., `.kiro/settings/mcp.json`):
 
 ```json
 {
@@ -70,108 +67,94 @@ Add to your MCP client configuration:
         "run",
         "--directory",
         "/path/to/aws-infra-manager-mcp-server",
-        "aws-infra-manager-mcp-server"
+        "python",
+        "-m",
+        "aws_infra_manager_mcp_server.server"
       ],
       "env": {
-        "AWS_PROFILE": "your-aws-profile",
         "AWS_REGION": "us-east-1"
       },
       "disabled": false,
       "autoApprove": [
+        "get_caller_identity",
         "list_ec2_instances",
-        "describe_vpc",
-        "get_cloudwatch_metrics",
-        "list_eks_clusters"
+        "list_vpcs",
+        "list_s3_buckets",
+        "list_rds_instances",
+        "list_lambda_functions",
+        "get_aws_regions"
       ]
     }
   }
 }
 ```
 
+### AWS Credentials
+
+Ensure your AWS credentials are configured using one of these methods:
+
+```bash
+# AWS CLI configuration
+aws configure
+
+# Or set environment variables
+export AWS_ACCESS_KEY_ID=your-access-key
+export AWS_SECRET_ACCESS_KEY=your-secret-key
+export AWS_REGION=us-east-1
+
+# Or use AWS profiles
+export AWS_PROFILE=your-profile-name
+```
+
 ## AWS Permissions
 
-The server requires comprehensive AWS permissions for:
+The server requires the following AWS permissions:
 
-### Foundation Services
-- `controltower:*`
-- `organizations:*`
-- `ram:*`
+### Required Permissions
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "sts:GetCallerIdentity",
+        "ec2:DescribeInstances",
+        "ec2:DescribeVpcs",
+        "ec2:DescribeRegions",
+        "s3:ListAllMyBuckets",
+        "rds:DescribeDBInstances",
+        "lambda:ListFunctions"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
 
-### Compute & Networking
-- `ec2:*`
-- `outposts:*`
-- `eks:*`
-
-### Monitoring & IaC
-- `cloudwatch:*`
-- `logs:*`
-- `aps:*` (Amazon Managed Prometheus)
-- `grafana:*` (Amazon Managed Grafana)
-- `cloudformation:*`
-
-### Supporting Services
-- `iam:PassRole`
-- `sts:GetCallerIdentity`
+### Minimal IAM Policy
+For security, you can create a minimal IAM policy with only the required read permissions above.
 
 ## Available Tools
 
-### Control Tower & Organizations
-- `create_landing_zone` - Create Control Tower landing zone
-- `list_organizational_units` - List OUs in organization
-- `create_organizational_unit` - Create new OU
-- `enable_control` - Enable Control Tower control
-- `list_accounts` - List organization accounts
-
-### Resource Access Manager
-- `create_resource_share` - Create resource share
-- `associate_resource_share` - Associate resources with share
-- `get_resource_share_invitations` - List pending invitations
+### Core AWS Tools
+- `get_caller_identity` - Get information about the current AWS caller identity
+- `get_aws_regions` - Get list of all available AWS regions
 
 ### EC2 Management
-- `list_ec2_instances` - List EC2 instances
-- `create_ec2_instance` - Launch new instance
-- `terminate_ec2_instance` - Terminate instance
-- `describe_security_groups` - List security groups
-- `create_security_group` - Create security group
+- `list_ec2_instances` - List EC2 instances with optional filtering
 
 ### VPC Management
-- `list_vpcs` - List VPCs
-- `create_vpc` - Create new VPC
-- `list_subnets` - List subnets
-- `create_subnet` - Create subnet
-- `create_nat_gateway` - Create NAT gateway
+- `list_vpcs` - List all VPCs in the specified region
 
-### EKS Management
-- `list_eks_clusters` - List EKS clusters
-- `create_eks_cluster` - Create EKS cluster
-- `describe_eks_cluster` - Get cluster details
-- `list_node_groups` - List node groups
-- `create_node_group` - Create node group
+### S3 Management
+- `list_s3_buckets` - List all S3 buckets
 
-### CloudWatch
-- `get_cloudwatch_metrics` - Retrieve metrics
-- `create_cloudwatch_alarm` - Create alarm
-- `list_log_groups` - List log groups
-- `create_dashboard` - Create CloudWatch dashboard
+### RDS Management
+- `list_rds_instances` - List all RDS database instances
 
-### Prometheus & Grafana
-- `list_prometheus_workspaces` - List Prometheus workspaces
-- `create_prometheus_workspace` - Create workspace
-- `query_prometheus` - Execute PromQL query
-- `list_grafana_workspaces` - List Grafana workspaces
-- `create_grafana_workspace` - Create Grafana workspace
-
-### CloudFormation
-- `list_cloudformation_stacks` - List stacks
-- `create_cloudformation_stack` - Create stack
-- `update_cloudformation_stack` - Update stack
-- `delete_cloudformation_stack` - Delete stack
-- `describe_stack_events` - Get stack events
-
-### Outposts
-- `list_outposts` - List Outposts
-- `describe_outpost` - Get Outpost details
-- `list_outpost_instances` - List instances on Outpost
+### Lambda Management
+- `list_lambda_functions` - List all Lambda functions
 
 ## Development
 
@@ -179,7 +162,10 @@ The server requires comprehensive AWS permissions for:
 # Install with development dependencies
 uv sync --extra dev
 
-# Run tests
+# Run the server directly for testing
+uv run python -m aws_infra_manager_mcp_server.server
+
+# Run tests (if available)
 uv run pytest
 
 # Format code
@@ -190,115 +176,120 @@ uv run isort .
 uv run mypy .
 ```
 
-## Command Line Interface
+## Testing the Server
 
-The server includes a comprehensive CLI for testing and management:
+You can test the server functionality:
 
 ```bash
-# Test AWS connection
-uv run aws-infra-cli test-connection
+# Test AWS credentials and connection
+uv run python -c "
+import sys
+sys.path.insert(0, 'src')
+from aws_infra_manager_mcp_server.server import aws_clients
+try:
+    sts = aws_clients.get_client('sts')
+    identity = sts.get_caller_identity()
+    print(f'✅ AWS connection successful - Account: {identity[\"Account\"]}')
+except Exception as e:
+    print(f'❌ AWS connection failed: {e}')
+"
 
-# Perform comprehensive health check
-uv run aws-infra-cli health-check
-
-# List resources in different formats
-uv run aws-infra-cli list ec2 --region us-west-2
-uv run aws-infra-cli list s3 --output table
-uv run aws-infra-cli list vpcs --output yaml
-
-# Create resources
-uv run aws-infra-cli create vpc --cidr 10.0.0.0/16 --name test-vpc
-uv run aws-infra-cli create ec2 --image-id ami-12345678 --instance-type t3.micro --name test-instance
-uv run aws-infra-cli create s3 --bucket-name my-unique-bucket --versioning
-
-# Filter resources
-uv run aws-infra-cli list ec2 --state running --tag Environment=production
-
-# Get help for any command
-uv run aws-infra-cli --help
-uv run aws-infra-cli list --help
-uv run aws-infra-cli create --help
+# Test server import
+uv run python -c "
+import sys
+sys.path.insert(0, 'src')
+from aws_infra_manager_mcp_server.server import main, mcp
+print(f'✅ Server imported successfully with {len(mcp.tools)} tools')
+"
 ```
 
-## Interactive Demo
+## Usage Examples
 
-Run the comprehensive demo script to see all features in action:
+### Using with Kiro IDE
 
-```bash
-# Run interactive demo (dry run - no resources created)
-uv run python examples/demo_script.py --dry-run
+Once configured, you can use the MCP tools directly in Kiro:
 
-# Run actual demo (creates real AWS resources)
-uv run python examples/demo_script.py --region us-east-1
+```
+# List all EC2 instances
+list all my ec2 instances
 
-# The demo creates:
-# • VPC with public subnet and security group
-# • EC2 instance with web server
-# • RDS MySQL database (if possible)
-# • S3 bucket with versioning
-# • Lambda function (if IAM role available)
-# • Demonstrates cleanup procedures
+# Get AWS account information  
+get my aws caller identity
+
+# List VPCs
+show me all my vpcs
+
+# List S3 buckets
+what s3 buckets do I have
 ```
 
 ## Examples
 
-### Create a VPC with subnets
+### List EC2 Instances
 ```python
-# Create VPC
-vpc_result = await mcp_client.call_tool("create_vpc", {
-    "cidr_block": "10.0.0.0/16",
-    "name": "my-vpc"
-})
+# List all instances
+instances = await mcp_client.call_tool("list_ec2_instances")
 
-# Create public subnet
-subnet_result = await mcp_client.call_tool("create_subnet", {
-    "vpc_id": vpc_result["vpc_id"],
-    "cidr_block": "10.0.1.0/24",
-    "availability_zone": "us-east-1a",
-    "public": True
+# List only running instances
+running_instances = await mcp_client.call_tool("list_ec2_instances", {
+    "filters": {"instance-state-name": ["running"]}
 })
 ```
 
-### Launch EC2 instance
+### Get AWS Account Information
 ```python
-instance_result = await mcp_client.call_tool("create_ec2_instance", {
-    "image_id": "ami-0abcdef1234567890",
-    "instance_type": "t3.micro",
-    "subnet_id": subnet_result["subnet_id"],
-    "key_name": "my-key-pair"
-})
+# Get caller identity
+identity = await mcp_client.call_tool("get_caller_identity")
+print(f"Account: {identity['identity']['Account']}")
 ```
 
-### Create EKS cluster
+### List Resources
 ```python
-cluster_result = await mcp_client.call_tool("create_eks_cluster", {
-    "cluster_name": "my-cluster",
-    "version": "1.28",
-    "subnet_ids": [subnet_result["subnet_id"]],
-    "role_arn": "arn:aws:iam::123456789012:role/EKSServiceRole"
-})
-```
+# List VPCs
+vpcs = await mcp_client.call_tool("list_vpcs")
 
-### Set up monitoring
-```python
-# Create Prometheus workspace
-prometheus_result = await mcp_client.call_tool("create_prometheus_workspace", {
-    "alias": "my-prometheus"
-})
+# List S3 buckets
+buckets = await mcp_client.call_tool("list_s3_buckets")
 
-# Create Grafana workspace
-grafana_result = await mcp_client.call_tool("create_grafana_workspace", {
-    "name": "my-grafana",
-    "account_access_type": "CURRENT_ACCOUNT"
-})
+# List RDS instances
+databases = await mcp_client.call_tool("list_rds_instances")
+
+# List Lambda functions
+functions = await mcp_client.call_tool("list_lambda_functions")
+
+# Get available regions
+regions = await mcp_client.call_tool("get_aws_regions")
 ```
 
 ## Security Considerations
 
-- All AWS API calls use IAM roles with least privilege principles
-- Sensitive data is handled securely and not logged
-- Resource creation includes proper tagging for governance
-- Cross-account operations require explicit permissions
+- **Read-Only Operations**: Current implementation focuses on read-only operations for safety
+- **Least Privilege**: Use minimal IAM permissions as shown in the permissions section
+- **Credential Management**: AWS credentials are handled through standard AWS SDK methods
+- **Error Handling**: Comprehensive error handling prevents sensitive information leakage
+- **No Resource Creation**: Current tools only list/describe resources, no creation or modification
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Import Error**: Ensure the server.py file has a `main()` function
+2. **AWS Credentials**: Verify AWS credentials are configured correctly
+3. **MCP Connection**: Check that the MCP configuration path is correct
+4. **Dependencies**: Run `uv sync` to ensure all dependencies are installed
+
+### Debug Steps
+
+```bash
+# Test AWS credentials
+aws sts get-caller-identity
+
+# Test server import
+uv run python -c "from aws_infra_manager_mcp_server.server import main; print('✅ Import successful')"
+
+# Check MCP tools
+uv run python -c "from aws_infra_manager_mcp_server.server import mcp; print(f'Tools: {list(mcp.tools.keys())}')"
+```
 
 ## License
 
