@@ -31,13 +31,13 @@ This MCP server provides comprehensive management capabilities for:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                AWS Infrastructure Manager                    │
+│                AWS Infrastructure Manager                   │
 ├─────────────────────────────────────────────────────────────┤
-│  Foundation      │  Compute/Network  │  Monitoring/IaC     │
-│  • Control Tower │  • EC2            │  • CloudWatch       │
+│  Foundation      │  Compute/Network  │  Monitoring/IaC      │
+│  • Control Tower │  • EC2            │  • CloudWatch        │
 │  • Organizations │  • Outposts       │  • Prometheus        │
 │  • RAM           │  • VPC            │  • Grafana           │
-│                  │  • EKS            │  • CloudFormation   │
+│                  │  • EKS            │  • CloudFormation    │
 └─────────────────────────────────────────────────────────────┘
 ```
 
